@@ -1,0 +1,17 @@
+{
+  "tabs": [
+    {
+      "title": "Jay",
+      "chatMessages": [
+        ""
+      ]
+    },
+    {
+      "title": "hallo",
+      "chatMessages": [
+        "You: hallo",
+        "Chatbot: Hallo, hoe kan ik je helpen?"
+      ]
+    }
+  ]
+}
