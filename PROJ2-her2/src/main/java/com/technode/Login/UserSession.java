@@ -13,7 +13,7 @@ public class UserSession {
 
     private static String currentUserId;
     private static LoginCred currentUserCredentials;
-    private static final String SESSION_PATH = "src/main/java/com/technode/Json/";
+    private static final String SESSION_PATH = "/home/jvndalen/IdeaProjects/proj2herklad/PROJ2-her2/src/main/java/com/technode/Json/";
 
 
     public static String getCurrentUser() {

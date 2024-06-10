@@ -1,10 +1,14 @@
 package com.technode.UI;
 import com.technode.Login.*;
 import com.technode.QueryResolution.*;
+import com.technode.QueryResolution.textToImage.TextToImageResolutionStrategyFactory;
 import com.technode.Settings;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import com.technode.Login.LoginCred;
@@ -122,6 +126,32 @@ public class ARTGUI { ;
         tabPane.getTabs().add(tab);
     }
 
+    private void createImageTab(TabPane tabPane, String title, List<String> chatMessages) {
+        Tab tab = new Tab();
+        tab.setText(title);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(25, 25, 25, 25));
+        grid.setAlignment(Pos.CENTER);
+
+        VBox chatBox = initializeImageBox(chatMessages);
+
+        HBox hbButtons = new HBox(10);
+        hbButtons.setAlignment(Pos.TOP_RIGHT);
+
+        HBox spacer = new HBox();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        hbButtons.getChildren().add(spacer);
+
+        grid.add(hbButtons, 0, 0);
+        grid.add(chatBox, 0, 1);
+
+        tab.setContent(grid);
+        tabPane.getTabs().add(tab);
+    }
+
     private void createLoadedTab(UserSessionData.TabData tabData) {
         createTab(tabPane, tabData.getTitle(), tabData.getChatMessages());
     }
@@ -134,13 +164,40 @@ public class ARTGUI { ;
         dialog.setContentText(resourceBundle.getString("enterTabTitle") + ":");
 
         dialog.showAndWait().ifPresent(title -> {
-            createTab(tabPane, title, new ArrayList<>());
+            
+            chooseTypeDialog(tabPane, title, new ArrayList<>());
+        });
+    }
 
-            // Create and set TabData for the new tab
-            UserSessionData.TabData tabData = new UserSessionData.TabData();
-            tabData.setTitle(title);
-            tabData.setChatMessages(new ArrayList<>());
-            saveNewTabData(tabData);
+    private void chooseTypeDialog(TabPane tabPane, String title, List<String> chatMessages) {
+        // Show an input dialog to get the title of the new tab
+        ChoiceDialog<String> dialog = new ChoiceDialog<String>();
+        dialog.setTitle(resourceBundle.getString("newTab"));
+        dialog.setHeaderText(resourceBundle.getString("createNewTab"));
+        ObservableList<String> list = dialog.getItems();
+        //Adding items to the list
+        list.add("Text");
+        list.add("Text to Image");
+
+        dialog.showAndWait().ifPresent(_ -> {
+            
+            if(dialog.getSelectedItem() == "Text") {
+                createTab(tabPane, title, chatMessages);
+
+                // Create and set TabData for the new tab
+                UserSessionData.TabData tabData = new UserSessionData.TabData();
+                tabData.setTitle(title);
+                tabData.setChatMessages(new ArrayList<>());
+                saveNewTabData(tabData);
+            } else {
+                createImageTab(tabPane, title, chatMessages);
+
+                // Create and set TabData for the new tab
+                UserSessionData.TabData tabData = new UserSessionData.TabData();
+                tabData.setTitle(title);
+                tabData.setChatMessages(new ArrayList<>());
+                saveNewTabData(tabData);
+            }
         });
     }
 
@@ -239,6 +296,53 @@ public class ARTGUI { ;
 
         return chatBox;
     }
+
+    private VBox initializeImageBox(List<String> chatMessages) {
+        VBox chatBox = new VBox();
+        chatBox.setSpacing(10);
+        chatBox.setAlignment(Pos.TOP_LEFT);
+
+        // Create components for the chat box
+        Label chatLabel = new Label("Image Box");
+        
+        VBox chats = new VBox();
+        
+        ScrollPane scrollPane = new ScrollPane(chats);
+       
+        TextField userInputField = new TextField();
+        Button sendButton = new Button(resourceBundle.getString("send"));
+
+        // Add components to the chat box
+        chatBox.getChildren().addAll(chatLabel, scrollPane, userInputField, sendButton);
+
+        // Event handling for sending messages
+        sendButton.setOnAction(e -> {
+            String userInput = userInputField.getText();
+            // You can process the user input here or pass it to another method/class
+            userInputField.clear();
+            Image promptAnswer;
+            QueryResolutionResult<Image> result = resolveImageQuery(userInput);
+            promptAnswer = result.resultData();
+//            chatTextArea.appendText("Chatbot: " + promptAnswer + "\n");
+            ImageView imageView = createImageView(promptAnswer);
+            chats.getChildren().add(imageView);
+        });
+
+        return chatBox;
+    }
+
+    private ImageView createImageView(Image image) {
+        ImageView imageView = new ImageView(image);
+        imageView.setFitHeight(400);
+        imageView.setFitWidth(400);
+        setImageOnImageView(imageView, image);
+        return imageView;
+    }
+
+    private void setImageOnImageView(ImageView imageView, Image imagePath) {
+        imageView.setImage(imagePath);
+    }
+    
     public static void change(String newUsername, String newPassword, String newEmail, String currentPassword) {
         LoginCred currentCred = UserSession.getCurrentUserCredentials();
 
@@ -263,6 +367,13 @@ public class ARTGUI { ;
     }
     private QueryResolutionResult resolveQuery(String prompt) {
         QueryResolutionStrategyFactory factory = new TextToTextFactory();
+        QueryResolutionStrategy strategy = factory.createQueryResolutionStrategy();
+        QueryResolutionForm<String> form = new QueryResolutionForm<>(prompt);
+        return strategy.resolve(form);
+    }
+
+    private QueryResolutionResult resolveImageQuery(String prompt) {
+        QueryResolutionStrategyFactory factory = new TextToImageResolutionStrategyFactory();
         QueryResolutionStrategy strategy = factory.createQueryResolutionStrategy();
         QueryResolutionForm<String> form = new QueryResolutionForm<>(prompt);
         return strategy.resolve(form);

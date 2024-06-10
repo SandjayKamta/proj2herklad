@@ -13,11 +13,11 @@ public class LoginCred {
     // Default constructor needed for deserialization
     public LoginCred() {
         // Ensure id is set when a new object is created
-        this.id = UUID.randomUUID().toString();
+        this.id = "User1";
     }
 
     public LoginCred(String pass, String email) {
-        this.id = UUID.randomUUID().toString();
+        this.id = "User1";
         this.pass = hashPassword(pass);
         this.email = email;
     }

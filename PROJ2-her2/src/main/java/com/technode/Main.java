@@ -1,6 +1,5 @@
 package com.technode;
 
-
 import com.technode.UI.LoginGUI;
 
 import java.util.Locale;

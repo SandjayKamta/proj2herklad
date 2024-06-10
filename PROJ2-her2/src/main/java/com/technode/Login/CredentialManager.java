@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class CredentialManager {
 
-    private static final String FILE_PATH = "src/main/java/com/technode/Login/password.json";
+    private static final String FILE_PATH = "/home/jvndalen/IdeaProjects/proj2herklad/PROJ2-her2/src/main/java/com/technode/Login/password.json";
     private static Map<String, LoginCred> usersMap;
 
     static {
